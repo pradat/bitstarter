@@ -10,7 +10,7 @@ console.log(fs.readFileSync(outfile).toString());
 console.log("Test");
 
 app.get('/', function(request, response) {
-    response.send(fs.ReadFileSync(outfile).toString());
+    response.send(fs.readFileSync(outfile).toString());
    });
 
 
