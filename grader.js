@@ -1,5 +1,3 @@
-
-
 #!/usr/bin/env node
 /*
 Automatically grade files for the presence of specified HTML tags/attributes.
@@ -26,16 +24,25 @@ References:
 var fs = require('fs');
 var program = require('commander');
 var cheerio = require('cheerio');
-var HTMLFILE_DEFAULT = "index.html";
+var rest = require('restler');
+var util = require('util');
+
+var HTMLFILE_DEFAULT = "";
 var CHECKSFILE_DEFAULT = "checks.json";
+var URL_DEFAULT = "http://www.google.com";
 
 var assertFileExists = function(infile) {
     var instr = infile.toString();
     if(!fs.existsSync(instr)) {
-        console.log("%s does not exist. Exiting.", instr);
-        process.exit(1); // http://nodejs.org/api/process.html#process_process_exit_code
+	console.log("%s does not exist. Exiting.", instr);
+	process.exit(1); // http://nodejs.org/api/process.html#process_process_exit_code
     }
     return instr;
+};
+
+var assertUrlExists = function (url) {
+  var str = url.toString();
+    return str;
 };
 
 var cheerioHtmlFile = function(htmlfile) {
@@ -47,14 +54,33 @@ var loadChecks = function(checksfile) {
 };
 
 var checkHtmlFile = function(htmlfile, checksfile) {
-    $ = cheerioHtmlFile(htmlfile);
+    var response2console = function(result, response) {
+	if (result instanceof Error) {
+console.error("Error : url doesn't exit. Exiting.");
+process.exit(1);
+	}else if (htmlfile != HTMLFILE_DEFAULT){
+$ = cheerioHtmlFile(htmlfile);
+console.log("HTML TAKEN INTO ACCOUNT");
+}
+else {
+console.log("URL INTO ACCOUNT");
+
+var html = result.toString();
+		$ = cheerio.load(html) ;}
+    console.log($);
     var checks = loadChecks(checksfile).sort();
     var out = {};
     for(var ii in checks) {
-        var present = $(checks[ii]).length > 0;
-        out[checks[ii]] = present;
+	var present = $(checks[ii]).length > 0;
+	out[checks[ii]] = present;
     }
-    return out;
+	console.log("Tets");
+	var outJson = JSON.stringify(out, null, 4);
+	console.log(outJson);    
+	return;
+
+    };
+return response2console;
 };
 
 var clone = function(fn) {
@@ -63,15 +89,23 @@ var clone = function(fn) {
     return fn.bind({});
 };
 
+
+
+
+
 if(require.main == module) {
     program
-        .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
-        .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
-        .parse(process.argv);
+	.option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
+	.option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
+	.option('-u, --url <url_file>', 'Url to .html', clone(assertUrlExists),URL_DEFAULT)
+	.parse(process.argv);
+
     var checkJson = checkHtmlFile(program.file, program.checks);
-    var outJson = JSON.stringify(checkJson, null, 4);
-    console.log(outJson);
+
+console.log (program.url);
+   rest.get(program.url).on('complete', checkJson);
+    
+
 } else {
     exports.checkHtmlFile = checkHtmlFile;
 }
-
