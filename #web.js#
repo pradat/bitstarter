@@ -8,7 +8,6 @@ var app = express.createServer(express.logger());
 
 console.log(fs.readFileSync(outfile).toString());
 
-
 app.get('/', function(request, response) {
     response.send(fs.readFileSync(outfile).toString());
    });
