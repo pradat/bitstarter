@@ -8,6 +8,7 @@ var app = express.createServer(express.logger());
 
 console.log(fs.readFileSync(outfile).toString());
 
+app.use(express.static(__dirname + '/public'));
 
 app.get('/', function(request, response) {
     response.send(fs.readFileSync(outfile).toString());
